@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Disease Prediction</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-SgOJa3DmI69IUzQ2PVdRZhwQ+dy64/BUtbMJw1MZ8t5HZApcHrRKUc4W0kG879m7" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Roboto', Arial, sans-serif;
+            background-color: #f8f9fa;
+            padding-bottom: 40px;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #4e54c8, #8f94fb);
+            color: white;
+            padding: 30px 0;
+            margin-bottom: 30px;
+            border-radius: 0 0 20px 20px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        .main-card {
+            border-radius: 15px;
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            margin-bottom: 30px;
+            /* Increased width by adjusting Bootstrap column size in the HTML */
+        }
+        
+        .card-header {
+            background-color: #f1f5f9;
+            border-bottom: 1px solid #e9ecef;
+            padding: 15px 20px;
+        }
+        
+        .symptom-container {
+            max-height: 400px;
+            overflow-y: auto;
+            padding: 10px 0px 0px 20px;
+        }
+        
+        .symptom-item {
+            padding: 8px 15px;
+            border-radius: 10px;
+            margin-bottom: 8px;
+            transition: all 0.2s ease;
+        }
+        
+        .symptom-item:hover {
+            background-color: #f8f9fa;
+        }
+        
+        .symptom-item label {
+            cursor: pointer;
+            width: 100%;
+            margin-bottom: 0;
+            padding-left: 10px;
+        }
+        
+        .form-check-input {
+            cursor: pointer;
+        }
+        
+        .predict-btn {
+            background: linear-gradient(135deg, #4e54c8, #8f94fb);
+            border: none;
+            padding: 12px 30px;
+            border-radius: 30px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .predict-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+            background: linear-gradient(135deg, #4048b5, #7a80e3);
+        }
+        
+        .result-card {
+            border-radius: 15px;
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            display: none;
+        }
+        
+        .result-card.visible {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        .result-header {
+            background: linear-gradient(135deg, #43cea2, #185a9d);
+            color: white;
+            padding: 20px;
+        }
+        
+        .search-box {
+            position: relative;
+            margin: 20px;
+        }
+        
+        .search-box .form-control {
+            padding-left: 40px;
+            border-radius: 20px;
+        }
+        
+        .search-icon {
+            position: absolute;
+            left: 15px;
+            top: 10px;
+            color: #6c757d;
+        }
+        
+        .selected-count {
+            background-color: #e0f7fa;
+            border-radius: 20px;
+            padding: 8px 15px;
+            font-size: 0.9rem;
+            margin-bottom: 20px;
+            text-align: center;
+            display: none;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @media (max-width: 768px) {
+            .header {
+                padding: 20px 0;
+                border-radius: 0 0 15px 15px;
+            }
+            
+            .main-card, .result-card {
+                margin-left: 10px;
+                margin-right: 10px;
+            }
+            
+            .predict-btn {
+                width: 100%;
+            }
+        }
+        
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: #c1c9d6;
+            border-radius: 10px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: #a8b2c1;
+        }
+        
+        /* New styles for multiple columns of symptoms */
+        .symptom-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header text-center">
+        <div class="container">
+            <h1><i class="fas fa-heartbeat me-2"></i>Health Symptom Analyzer</h1>
+            <p class="lead">Select your symptoms for an instant disease prediction</p>
+        </div>
+    </div>
+    
+    <div class="container">
+        <div class="row justify-content-center">
+            <!-- Changed from col-lg-8 to col-lg-10 to make it wider -->
+            <div class="col-lg-10">
+                <div class="main-card bg-white">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0"><i class="fas fa-clipboard-list me-2"></i>Symptom Selection</h5>
+                        <span class="badge bg-primary" id="symptoms-count">0 selected</span>
+                    </div>
+                    <div class="card-body">
+                        <div class="search-box">
+                            <i class="fas fa-search search-icon"></i>
+                            <input type="text" class="form-control" id="symptom-search" placeholder="Search symptoms...">
+                        </div>
+                        
+                        <div class="selected-count" id="selected-count">
+                            <i class="fas fa-check-circle me-2"></i><span id="count-text">0 symptoms selected</span>
+                        </div>
+                        
+                        <form id="symptom-form">
+                            <div class="symptom-container" id="symptom-list">
+                                <!-- Symptoms will be dynamically added here in a grid layout -->
+                            </div>
+                            
+                            <div class="text-center mt-4">
+                                <button type="submit" class="btn btn-primary btn-lg predict-btn">
+                                    <i class="fas fa-microscope me-2"></i>Analyze Symptoms
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                
+                <div class="result-card" id="result-card">
+                    <div class="result-header">
+                        <h4 class="mb-0"><i class="fas fa-stethoscope me-2"></i>Prediction Result</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="text-center">
+                            <div class="mb-3">
+                                <i class="fas fa-diagnoses fa-3x text-primary"></i>
+                            </div>
+                            <h3 id="result">Analyzing your symptoms...</h3>
+                            <p class="text-muted mt-3">This is an automated prediction. Please consult with a healthcare professional for proper diagnosis.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Assume symptoms array is passed from server
+        const symptoms = {{ symptom_list | tojson | safe }};
+        const symptomList = document.getElementById("symptom-list");
+        const searchInput = document.getElementById("symptom-search");
+        const selectedCount = document.getElementById("selected-count");
+        const symptomsCount = document.getElementById("symptoms-count");
+        const resultCard = document.getElementById("result-card");
+        
+        // Generate checkboxes for symptoms
+        function renderSymptoms(symptomArray) {
+            symptomList.innerHTML = '';
+            
+            // Create a grid container
+            const grid = document.createElement("div");
+            grid.className = "symptom-grid";
+            symptomList.appendChild(grid);
+            
+            symptomArray.forEach(symptom => {
+                const div = document.createElement("div");
+                div.classList.add("symptom-item", "form-check");
+                
+                const checkbox = document.createElement("input");
+                checkbox.type = "checkbox";
+                checkbox.className = "form-check-input";
+                checkbox.name = "symptoms";
+                checkbox.value = symptom;
+                checkbox.id = symptom.replace(/\s+/g, '-').toLowerCase();
+                
+                const label = document.createElement("label");
+                label.className = "form-check-label";
+                label.htmlFor = checkbox.id;
+                label.innerText = symptom;
+                
+                div.appendChild(checkbox);
+                div.appendChild(label);
+                grid.appendChild(div);
+                
+                // Add click event to the entire div for better UX
+                div.addEventListener('click', function(e) {
+                    if (e.target !== checkbox) {
+                        checkbox.checked = !checkbox.checked;
+                        updateSelectedCount();
+                    }
+                });
+                
+                checkbox.addEventListener('change', updateSelectedCount);
+            });
+        }
+        
+        // Initialize with all symptoms
+        renderSymptoms(symptoms);
+        
+        // Search functionality
+        searchInput.addEventListener('input', function() {
+            const searchTerm = this.value.toLowerCase();
+            const filteredSymptoms = symptoms.filter(symptom => 
+                symptom.toLowerCase().includes(searchTerm)
+            );
+            renderSymptoms(filteredSymptoms);
+        });
+        
+        // Update selected count
+        function updateSelectedCount() {
+            const selected = Array.from(document.querySelectorAll('input[name="symptoms"]:checked'));
+            const count = selected.length;
+            
+            symptomsCount.textContent = `${count} selected`;
+            
+            if (count > 0) {
+                selectedCount.style.display = 'block';
+                document.getElementById('count-text').textContent = `${count} symptom${count > 1 ? 's' : ''} selected`;
+            } else {
+                selectedCount.style.display = 'none';
+            }
+        }
+        
+        // Handle form submission
+        document.getElementById("symptom-form").addEventListener("submit", async (e) => {
+            e.preventDefault();
+            
+            const selected = Array.from(document.querySelectorAll('input[name="symptoms"]:checked'))
+                .map(cb => cb.value);
+            
+            if (selected.length === 0) {
+                alert("Please select at least one symptom");
+                return;
+            }
+            
+            // Show loading state
+            resultCard.classList.add('visible');
+            document.getElementById("result").innerHTML = `
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <p class="mt-2">Analyzing symptoms...</p>
+            `;
+            
+            try {
+                const response = await fetch("/predict", {
+                    method: "POST",
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ symptoms: selected })
+                });
+                
+                const result = await response.json();
+                
+                // Show result with animation
+                setTimeout(() => {
+                    document.getElementById("result").innerHTML = `
+                        <div class="alert alert-info">
+                            <h4 class="alert-heading">Predicted Condition:</h4>
+                            <h3 class="text-primary">${result.prediction}</h3>
+                        </div>
+                    `;
+                    
+                    // Scroll to result
+                    resultCard.scrollIntoView({ behavior: 'smooth' });
+                }, 800);
+                
+            } catch (error) {
+                document.getElementById("result").innerHTML = `
+                    <div class="alert alert-danger">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        An error occurred. Please try again.
+                    </div>
+                `;
+            }
+        });
+    </script>
+</body>
+</html>
