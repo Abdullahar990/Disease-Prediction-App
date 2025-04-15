@@ -4,11 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Disease Prediction</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-SgOJa3DmI69IUzQ2PVdRZhwQ+dy64/BUtbMJw1MZ8t5HZApcHrRKUc4W0kG879m7" crossorigin="anonymous">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.cdnfonts.com/css/gilroy" rel="stylesheet">
     <style>
         body {
-            font-family: 'Roboto', Arial, sans-serif;
+            font-family: 'Gilroy', Arial, sans-serif;
             background-color: #f8f9fa;
             padding-bottom: 40px;
         }
@@ -27,7 +28,6 @@
             box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
             overflow: hidden;
             margin-bottom: 30px;
-            /* Increased width by adjusting Bootstrap column size in the HTML */
         }
         
         .card-header {
@@ -39,7 +39,7 @@
         .symptom-container {
             max-height: 400px;
             overflow-y: auto;
-            padding: 10px 0px 0px 20px;
+            padding: 10px 0 0 20px;
         }
         
         .symptom-item {
@@ -165,7 +165,6 @@
             background: #a8b2c1;
         }
         
-        /* New styles for multiple columns of symptoms */
         .symptom-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -183,7 +182,6 @@
     
     <div class="container">
         <div class="row justify-content-center">
-            <!-- Changed from col-lg-8 to col-lg-10 to make it wider -->
             <div class="col-lg-10">
                 <div class="main-card bg-white">
                     <div class="card-header d-flex justify-content-between align-items-center">
@@ -202,7 +200,7 @@
                         
                         <form id="symptom-form">
                             <div class="symptom-container" id="symptom-list">
-                                <!-- Symptoms will be dynamically added here in a grid layout -->
+                                <!-- Symptoms will be dynamically added here -->
                             </div>
                             
                             <div class="text-center mt-4">
@@ -233,7 +231,7 @@
     </div>
     
     <script>
-        // Assume symptoms array is passed from server
+        // Get symptoms from server
         const symptoms = JSON.parse('{{ symptom_list | tojson | safe }}') || [];
         const symptomList = document.getElementById("symptom-list");
         const searchInput = document.getElementById("symptom-search");
@@ -245,7 +243,6 @@
         function renderSymptoms(symptomArray) {
             symptomList.innerHTML = '';
             
-            // Create a grid container
             const grid = document.createElement("div");
             grid.className = "symptom-grid";
             symptomList.appendChild(grid);
@@ -270,7 +267,6 @@
                 div.appendChild(label);
                 grid.appendChild(div);
                 
-                // Add click event to the entire div for better UX
                 div.addEventListener('click', function(e) {
                     if (e.target !== checkbox) {
                         checkbox.checked = !checkbox.checked;
@@ -296,14 +292,15 @@
         
         // Update selected count
         function updateSelectedCount() {
-            const selected = Array.from(document.querySelectorAll('input[name="symptoms"]:checked'));
+            const selected = document.querySelectorAll('input[name="symptoms"]:checked');
             const count = selected.length;
             
             symptomsCount.textContent = `${count} selected`;
             
             if (count > 0) {
                 selectedCount.style.display = 'block';
-                document.getElementById('count-text').textContent = `${count} symptom${count > 1 ? 's' : ''} selected`;
+                document.getElementById('count-text').textContent = 
+                    `${count} symptom${count > 1 ? 's' : ''} selected`;
             } else {
                 selectedCount.style.display = 'none';
             }
@@ -313,8 +310,9 @@
         document.getElementById("symptom-form").addEventListener("submit", async (e) => {
             e.preventDefault();
             
-            const selected = Array.from(document.querySelectorAll('input[name="symptoms"]:checked'))
-                .map(cb => cb.value);
+            const selected = Array.from(
+                document.querySelectorAll('input[name="symptoms"]:checked')
+            ).map(cb => cb.value);
             
             if (selected.length === 0) {
                 alert("Please select at least one symptom");
@@ -339,7 +337,6 @@
                 
                 const result = await response.json();
                 
-                // Show result with animation
                 setTimeout(() => {
                     document.getElementById("result").innerHTML = `
                         <div class="alert alert-info">
@@ -347,8 +344,6 @@
                             <h3 class="text-primary">${result.prediction}</h3>
                         </div>
                     `;
-                    
-                    // Scroll to result
                     resultCard.scrollIntoView({ behavior: 'smooth' });
                 }, 800);
                 
