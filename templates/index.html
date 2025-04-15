@@ -234,7 +234,7 @@
     
     <script>
         // Assume symptoms array is passed from server
-        const symptoms = {{ symptom_list | tojson | safe }};
+        const symptoms = JSON.parse('{{ symptom_list | tojson | safe }}') || [];
         const symptomList = document.getElementById("symptom-list");
         const searchInput = document.getElementById("symptom-search");
         const selectedCount = document.getElementById("selected-count");
